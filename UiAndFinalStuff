@@ -82,7 +82,36 @@ def fileSelect():
         print("File type not supported")
         globT.deiconify()
 def useCamera():
-    return
+    video_capture = cv2.VideoCapture(0)
+    ttt = True
+    try:
+        while cv2.getWindowProperty('Live Feed', 0) >= 0 or ttt:
+            # Capture frame-by-frame
+            ret, frame = video_capture.read()
+
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            faces = face_cascade.detectMultiScale(gray, scaleFactor = 1.1, minNeighbors=5, minSize=(30, 30), flags = cv2.CASCADE_SCALE_IMAGE)
+            eyes = face_cascade.detectMultiScale(gray, scaleFactor = 1.1, minNeighbors=5, minSize=(30, 30), flags = cv2.CASCADE_SCALE_IMAGE)
+            for (x,y,w,h) in faces:
+                cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+                roi_gray = gray[y:y+h, x:x+w]
+                roi_color = frame[y:y+h, x:x+w]
+                eyes = eye_cascade.detectMultiScale(roi_gray)
+                for (ex,ey,ew,eh) in eyes:
+                    cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+            cv2.imshow('Live Feed', frame)
+            ttt=False
+            key = cv2.waitKey(20)
+            if key == 27:
+                break
+    except:
+        print("Error ocurred")
+
+    # When everything is done, release the capture
+    video_capture.release()
+    cv2.destroyAllWindows()
+    
 def checkImage():
     eCount = 0
     img = cv2.imread(globImPath)
@@ -98,7 +127,7 @@ def checkImage():
             cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
     globT.wm_attributes('-topmost', 0)
     cv2.destroyAllWindows()
-    cv2.imshow('img',img)
+    cv2.imshow('Face detection',img)
     cv2.waitKey(50)
     if len(faces)>0:
         print('face(s) found')
@@ -108,6 +137,7 @@ def checkImage():
         return False
 #close code
 def close():
+    cv2.destroyAllWindows()
     globT.destroy()
     globT.quit()
 
