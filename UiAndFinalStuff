@@ -7,6 +7,7 @@ import cv2
 from tkinter import *
 from PIL import Image, ImageTk
 from tkinter.filedialog import askopenfilename
+globImPath = ""
 globIm = None
 globT = None
 
@@ -47,6 +48,8 @@ except:
 #UI and logic code  
 def fileSelect():
     Tk().withdraw()
+    global globImPath
+    global globT
     #filename = askopenfilename(filetypes=[("Image Files",("*.png","*.jpeg","*.jp2","*.jpeg"))])
     #print(filename)
     try:
@@ -54,7 +57,8 @@ def fileSelect():
         globT.withdraw()
         globT.lift()
         globT.wm_attributes('-topmost', 1)
-        globIm=ImageTk.PhotoImage(Image.open(askopenfilename(filetypes=[("Image Files",("*.png","*.jpeg","*.jp2","*.jpeg"))])))
+        globImPath = askopenfilename(filetypes=[("Image Files",("*.png","*.jpeg","*.jp2","*.jpeg","*.jpg"))])
+        globIm=ImageTk.PhotoImage(Image.open(globImPath))
         userImage = Label(globT,image=globIm)
         userImage.image = globIm
         userImage.pack(side=BOTTOM)
@@ -65,12 +69,31 @@ def fileSelect():
     except:
         print("File type not supported")
         globT.deiconify()
-        return
 def useCamera():
     return
 def checkImage():
-    #checks if image is a face
-    a=0
+    eCount = 0
+    img = cv2.imread(globImPath)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    for (x,y,w,h) in faces:
+        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+        roi_gray = gray[y:y+h, x:x+w]
+        roi_color = img[y:y+h, x:x+w]
+        eyes = eye_cascade.detectMultiScale(roi_gray)
+        eCount = len(eyes)
+        for (ex,ey,ew,eh) in eyes:
+            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
+    globT.wm_attributes('-topmost', 0)
+    cv2.destroyAllWindows()
+    cv2.imshow('img',img)
+    cv2.waitKey(50)
+    if len(faces)>0:
+        print('face(s) found')
+        return True 
+    else:
+        print('no face(s) found')
+        return False
 #close code
 def close():
     globT.destroy()
@@ -84,9 +107,6 @@ globT = Tk()
 globT.protocol("WM_DELETE_WINDOW", close)
 globT.update()
 globT.lift()
-
-#setup code
-butframe = Frame(globT,)
     
 #text
 topText = Message(globT, text="Face recognizer",width=300,font=('arial', 20))
