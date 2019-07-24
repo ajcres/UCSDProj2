@@ -10,6 +10,7 @@ from tkinter.filedialog import askopenfilename
 globImPath = ""
 globIm = None
 globT = None
+userImage = None
 
 
 
@@ -50,23 +51,34 @@ def fileSelect():
     Tk().withdraw()
     global globImPath
     global globT
-    #filename = askopenfilename(filetypes=[("Image Files",("*.png","*.jpeg","*.jp2","*.jpeg"))])
-    #print(filename)
-    try:
+    global userImage
+    if True:
         globT.update()
         globT.withdraw()
         globT.lift()
         globT.wm_attributes('-topmost', 1)
         globImPath = askopenfilename(filetypes=[("Image Files",("*.png","*.jpeg","*.jp2","*.jpeg","*.jpg"))])
-        globIm=ImageTk.PhotoImage(Image.open(globImPath))
-        userImage = Label(globT,image=globIm)
-        userImage.image = globIm
-        userImage.pack(side=BOTTOM)
+        
+        imo=Image.open(globImPath)
+        if (imo.width>800):
+            imo=imo.resize((800, imo.height),Image.ANTIALIAS)
+        if (imo.height>600):
+            imo=imo.resize((imo.width, 600),Image.ANTIALIAS)
+        
+        globIm=ImageTk.PhotoImage(imo)
+        
+        if userImage is None:
+            userImage = Label(globT,image=globIm)
+            userImage.image = globIm
+            userImage.pack(side=BOTTOM)
+        else:
+            userImage.configure(image=globIm)
+            userImage.image = globIm
         goButton['state']='normal'
         globT.deiconify()
         globT.update()
-        globT.minsize(globT.winfo_width(), globT.winfo_height())
-    except:
+        #globT.minsize(globT.winfo_width(), globT.winfo_height())
+    else:
         print("File type not supported")
         globT.deiconify()
 def useCamera():
@@ -103,23 +115,26 @@ def close():
 
 
 globT = Tk()
-
+globIm = None
+userImage = None
 globT.protocol("WM_DELETE_WINDOW", close)
 globT.update()
 globT.lift()
+f1 = Frame(globT)
+f1.pack(side=BOTTOM)
     
 #text
 topText = Message(globT, text="Face recognizer",width=300,font=('arial', 20))
 topText.pack(side=TOP)
 
 #buttons
-selButton = Button(globT, text = "Select file", fg="black",command = fileSelect,width=14,font=('arial', 16))
+selButton = Button(f1, text = "Select file", fg="black",command = fileSelect,width=14,font=('arial', 16))
 selButton.pack(side=LEFT)
-camButton = Button(globT, text = "Take photo", fg="black",command = useCamera,width=14,font=('arial', 16))
+camButton = Button(f1, text = "Take photo", fg="black",command = useCamera,width=14,font=('arial', 16))
 camButton.pack(side=LEFT)
-goButton = Button(globT, text = "Run", fg="green",command = checkImage,width=14,font=('arial', 16),state='disabled')
+goButton = Button(f1, text = "Run", fg="green",command = checkImage,width=14,font=('arial', 16),state='disabled')
 goButton.pack(side=LEFT)
-quitButton = Button(globT, text = "Quit", fg="red",command=close,width=14,font=('arial', 16,'bold'))
+quitButton = Button(f1, text = "Quit", fg="red",command=close,width=14,font=('arial', 16,'bold'))
 quitButton.pack(side=LEFT)
 
 #stuff
