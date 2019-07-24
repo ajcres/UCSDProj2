@@ -4,9 +4,11 @@ pip install opencv-python
 
 import numpy as np
 import cv2
+import sys
 from tkinter import *
 from PIL import Image, ImageTk
 from tkinter.filedialog import askopenfilename
+cascPath = sys.argv[1]
 globImPath = ""
 globIm = None
 globT = None
@@ -147,6 +149,7 @@ def close():
 globT = Tk()
 globIm = None
 userImage = None
+cv2.destroyAllWindows()
 globT.protocol("WM_DELETE_WINDOW", close)
 globT.update()
 globT.lift()
@@ -160,7 +163,7 @@ topText.pack(side=TOP)
 #buttons
 selButton = Button(f1, text = "Select file", fg="black",command = fileSelect,width=14,font=('arial', 16))
 selButton.pack(side=LEFT)
-camButton = Button(f1, text = "Take photo", fg="black",command = useCamera,width=14,font=('arial', 16))
+camButton = Button(f1, text = "Use Webcam", fg="black",command = useCamera,width=14,font=('arial', 16))
 camButton.pack(side=LEFT)
 goButton = Button(f1, text = "Run", fg="green",command = checkImage,width=14,font=('arial', 16),state='disabled')
 goButton.pack(side=LEFT)
